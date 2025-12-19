@@ -1,73 +1,41 @@
-# React + TypeScript + Vite
+# N/S/R高 通学コース 出席フォーム自動提出Chrome拡張機能
+Q.毎回提出するのが面倒な出席フォームを、URLを開くだけで自動で提出できたら良いなと思ったこと、ありませんか？
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A.この拡張機能を導入すれば、それが叶います！！
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 技術スタック
+- Node.js
+- React 19
+- Vite
+- TailwindCSS
 
-## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 使用言語
+- TypeScript
+- JavaScript
+- CSS
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 導入方法
+1. [Releasesを開く](https://github.com/tukuyomil032/Google-Forms-Auto-Submit-Extension/releases)
+2. 最新版のzipファイル(例：``G-Forms-Auto-Submit-Extension-v1.0.0.zip``)をダウンロードする
+3. ダウンロードしたzipファイルをデスクトップなど分かりやすい場所に解凍する
+4. Chrome拡張機能が使えるブラウザーを開く(Chrome/Microsoft Edge/Brave/Vivaldi/Arcなど)
+5. [拡張機能の管理画面を開く](https://arc.net/l/quote/euyaswkh)。または``chrome://extensions``などに直接アクセス
+6. 管理画面の右上にある``デベロッパー　モード``を有効にする(**手順6ができていれば、左上にボタンが3つ追加される**)
+7. **``パッケージ化されていない拡張機能を読み込む``を押す**
+8. フォルダの選択画面(Finderなど)が開くので、先程ダウンロードしたzipを解凍して出てきた``G-Forms-Auto-Submit-Extension``というフォルダを選択して読み込む
+9. **拡張機能一覧に``N/S/R高 通学コース 出席フォーム自動提出拡張機能``と書かれた拡張機能が表示されれば導入成功！！**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 使い方
+1. 導入後、拡張機能のアイコンを右クリックして固定する
+2. アイコンをクリックして拡張機能のメニュー画面を開く
+3. **別ウィンドウで開く**ボタンを押す(全画面の別タブで設定画面が開きます)
+4. **設定**タブに移動し、自分の名前と自動入力させたいGoogleフォームのURL、リストに表示する表示名を入力して追加を押す。
+5. 
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+このプロジェクトはMITライセンスの下で提供されています。詳細はLICENSEファイルを参照してください。
