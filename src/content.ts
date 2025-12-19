@@ -1,19 +1,20 @@
 import { type SavedForm, type StorageData } from './interface';
 
-// ページ読み込み完了後に実行
 window.addEventListener('load', () => {
-  // 描画待ちのために少し遅延させる
+  if (window.location.href.includes('formResponse')) {
+    requestCloseTab();
+    return;
+  }
+
   setTimeout(main, 1500);
 });
 
 async function main() {
   const url = window.location.href;
-  
-  // viewformが含まれていない場合は動作しない（編集画面などで誤爆しないように）
+
   if (!url.includes('viewform')) return;
 
   chrome.storage.local.get(['forms', 'profile'], (result) => {
-    // データが空の場合でもエラーにならないよう安全にキャスト
     const data = result as Partial<StorageData>;
     const forms = data.forms || [];
     const profile = data.profile;
@@ -23,7 +24,6 @@ async function main() {
       return;
     }
 
-    // URLにIDが含まれている設定を探す
     const targetForm = forms.find((f) => url.includes(f.urlId));
 
     if (targetForm) {
@@ -33,7 +33,6 @@ async function main() {
   });
 }
 
-// React/Angular入力ハック
 const setNativeValue = (element: HTMLInputElement | HTMLTextAreaElement, value: string) => {
   const valueSetter = Object.getOwnPropertyDescriptor(element, 'value')?.set;
   const prototype = Object.getPrototypeOf(element);
@@ -49,17 +48,13 @@ const setNativeValue = (element: HTMLInputElement | HTMLTextAreaElement, value: 
   element.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
-// メールチェックボックス処理
 function handleEmailCheckbox() {
-  // role="checkbox" を持つ要素をすべて取得
   const checkboxes = document.querySelectorAll('div[role="checkbox"]');
   checkboxes.forEach((cb) => {
     const el = cb as HTMLElement;
-    // 親要素のテキストを含めて判定する
-    const container = el.closest('label') || el.parentElement || el; 
-    const textContent = (container.textContent || '').replace(/\s/g, ''); // 空白除去
+    const container = el.closest('label') || el.parentElement || el;
+    const textContent = (container.textContent || '').replace(/\s/g, '');
 
-    // "メールアドレス" かつ "記録" という言葉が含まれていれば対象
     if (textContent.includes('メールアドレス') && textContent.includes('記録')) {
       if (el.getAttribute('aria-checked') !== 'true') {
         console.log('Autofill: メールアドレス記録チェックボックスをONにします');
@@ -70,15 +65,12 @@ function handleEmailCheckbox() {
 }
 
 function executeAutoFill(formConfig: SavedForm, userName: string) {
-  // 1. メールチェック
   if (formConfig.autoCheckEmail) {
     handleEmailCheckbox();
   }
 
-  // 2. 名前入力
   setTimeout(() => {
     const textInputs = document.querySelectorAll('input[type="text"], textarea');
-    // 設定されたインデックスが存在するか確認してから入力
     if (textInputs[formConfig.targetIndex]) {
       console.log(`Autofill: ${formConfig.targetIndex}番目の入力欄に名前を入力します`);
       setNativeValue(textInputs[formConfig.targetIndex] as HTMLInputElement, userName);
@@ -87,39 +79,36 @@ function executeAutoFill(formConfig: SavedForm, userName: string) {
     }
   }, 500);
 
-  // 3. 送信ボタンを押す
-  // 入力が完了するのを少し待ってからボタンを探し始める
   setTimeout(() => {
     clickSubmitButtonRecursive();
   }, 1000);
 }
 
-// 送信ボタンを粘り強く探して押す関数
 function clickSubmitButtonRecursive(attempt = 1) {
+  if (window.location.href.includes('formResponse')) {
+    requestCloseTab();
+    return;
+  }
+
   if (attempt > 10) {
     console.log('Autofill: タイムアウト - 送信ボタンが見つかりませんでした');
     return;
   }
 
-  // あらゆるボタン要素を取得
   const candidates = Array.from(document.querySelectorAll('div[role="button"], button, span'));
-  
+
   const submitBtn = candidates.find(el => {
-    // 空白や改行をすべて削除して判定する ("送　信"対策)
     const text = (el.textContent || '').replace(/\s+/g, '');
     return text === '送信' || text === 'Submit';
   });
 
   if (submitBtn) {
-    // spanが見つかった場合、クリック可能な親要素(role=button)まで遡る
     const clickable = submitBtn.closest('div[role="button"], button') as HTMLElement || submitBtn as HTMLElement;
-    
+
     console.log('Autofill: 送信ボタンを発見。クリック処理を実行します。');
-    
-    // 視覚的にわかるように赤枠をつける
+
     clickable.style.border = '4px solid red';
 
-    // 座標付きの強力なクリックイベントを作成
     const rect = clickable.getBoundingClientRect();
     const x = rect.left + (rect.width / 2);
     const y = rect.top + (rect.height / 2);
@@ -128,19 +117,44 @@ function clickSubmitButtonRecursive(attempt = 1) {
       bubbles: true,
       cancelable: true,
       view: window,
-      clientX: x, // 座標を指定
+      clientX: x,
       clientY: y
     };
 
-    // マウスダウン -> マウスアップ -> クリック の順で発火
     clickable.dispatchEvent(new MouseEvent('mousedown', eventOptions));
     clickable.dispatchEvent(new MouseEvent('mouseup', eventOptions));
     clickable.dispatchEvent(new MouseEvent('click', eventOptions));
 
+    monitorSubmission();
+
   } else {
-    // 見つからない場合再試行
     console.log(`Autofill: 送信ボタン探索中...(${attempt}/10)`);
     setTimeout(() => clickSubmitButtonRecursive(attempt + 1), 1000);
+  }
+}
+
+function monitorSubmission() {
+  console.log('Autofill: 送信完了を監視します...');
+
+  let checks = 0;
+  const interval = setInterval(() => {
+    checks++;
+    if (window.location.href.includes('formResponse')) {
+      clearInterval(interval);
+      console.log('Autofill: 送信完了を確認しました。タブを閉じます。');
+      requestCloseTab();
+    } else if (checks > 20) {
+      clearInterval(interval);
+      console.log('Autofill: 送信完了を確認できませんでした（タイムアウト）');
+    }
+  }, 1000);
+}
+
+function requestCloseTab() {
+  try {
+    chrome.runtime.sendMessage({ action: 'closeTab' });
+  } catch (e) {
+    console.error('Autofill: タブを閉じるメッセージの送信に失敗しました', e);
   }
 }
 
