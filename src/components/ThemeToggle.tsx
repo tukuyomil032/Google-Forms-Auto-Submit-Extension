@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { type AppTheme } from '../interface';
-import { IconTheme } from './Icons';
+import { IconThemeSunMoon } from './Icons';
 
 interface Props {
   theme: AppTheme;
@@ -58,7 +58,7 @@ export const ThemeToggle: React.FC<Props> = ({ theme, onThemeChange }) => {
         className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors relative z-10"
         title={`テーマ切り替え: ${theme}`}
       >
-        <IconTheme />
+        <IconThemeSunMoon />
       </button>
 
       {particles.map(p => (
