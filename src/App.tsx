@@ -41,9 +41,14 @@ function App() {
 
     let bgColor = '', textColor = '';
     switch (effectiveTheme) {
-      case 'light': bgColor = '#f8fafc'; textColor = '#1e293b'; break;
-      case 'dark': bgColor = '#202124'; textColor = '#e2e8f0'; break;
-      case 'darkBlue': bgColor = '#0f172a'; textColor = '#f1f5f9'; break;
+      case 'light':
+        bgColor = '#f8fafc'; textColor = '#1e293b';
+        break;
+      case 'dark':
+        bgColor = '#202124'; textColor = '#e2e8f0';
+        break;
+      case 'darkBlue': bgColor = '#0f172a'; textColor = '#f1f5f9';
+        break;
     }
     document.body.style.backgroundColor = bgColor;
     document.body.style.color = textColor;
@@ -58,10 +63,14 @@ function App() {
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveTheme = theme === 'system' ? (isSystemDark ? 'dark' : 'light') : theme;
     switch (effectiveTheme) {
-      case 'light': return 'bg-white border-slate-200';
-      case 'dark': return 'bg-[#202124] border-gray-700';
-      case 'darkBlue': return 'bg-slate-900 border-slate-700';
-      default: return 'bg-white border-slate-200';
+      case 'light':
+        return 'bg-white border-slate-200';
+      case 'dark':
+        return 'bg-[#202124] border-gray-700';
+      case 'darkBlue':
+        return 'bg-slate-900 border-slate-700';
+      default:
+        return 'bg-white border-slate-200';
     }
   };
 
@@ -69,10 +78,14 @@ function App() {
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveTheme = theme === 'system' ? (isSystemDark ? 'dark' : 'light') : theme;
     switch (effectiveTheme) {
-      case 'light': return 'bg-white border-slate-200 text-slate-800';
-      case 'dark': return 'bg-[#303134] border-gray-600 text-gray-200';
-      case 'darkBlue': return 'bg-slate-800 border-slate-700 text-slate-100';
-      default: return 'bg-white border-slate-200';
+      case 'light':
+        return 'bg-white border-slate-200 text-slate-800';
+      case 'dark':
+        return 'bg-[#303134] border-gray-600 text-gray-200';
+      case 'darkBlue':
+        return 'bg-slate-800 border-slate-700 text-slate-100';
+      default:
+        return 'bg-white border-slate-200';
     }
   };
 
