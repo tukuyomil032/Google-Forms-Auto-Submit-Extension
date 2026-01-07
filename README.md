@@ -19,7 +19,7 @@ A.この拡張機能を導入すれば、それが叶います！！
 
 ## 導入方法
 1. [Releasesを開く](https://github.com/tukuyomil032/Google-Forms-Auto-Submit-Extension/releases)
-2. 最新版のzipファイル(例：``G-Forms-Auto-Submit-Extension-v1.0.0.zip``)をダウンロードする
+2. 最新版のzipファイル(例：``G-Forms-Auto-Submit-Extension-v x.x.x.zip``)をダウンロードする
 3. ダウンロードしたzipファイルをデスクトップなど分かりやすい場所に解凍する
 4. Chrome拡張機能が使えるブラウザーを開く(Chrome/Microsoft Edge/Brave/Vivaldi/Arcなど)
 5. [拡張機能の管理画面を開く](https://arc.net/l/quote/euyaswkh)。または``chrome://extensions``などに直接アクセス

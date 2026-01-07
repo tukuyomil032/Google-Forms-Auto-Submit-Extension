@@ -5,7 +5,7 @@ import { crx, defineManifest } from '@crxjs/vite-plugin'
 const manifest = defineManifest({
   manifest_version: 3,
   name: "N/S/R高 通学コース 出席フォーム自動提出拡張機能",
-  version: "1.0.0",
+  version: "1.0.1",
   permissions: ["storage", "tabs", "scripting"],
   host_permissions: ["https://docs.google.com/forms/*"],
   action: {

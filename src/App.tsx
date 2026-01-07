@@ -25,9 +25,15 @@ function App() {
   useEffect(() => {
     chrome.storage.local.get(['forms', 'profile', 'theme'], (result) => {
       const data = result as Partial<StorageData>;
-      if (Array.isArray(data.forms)) setForms(data.forms);
-      if (data.profile) setProfile(data.profile);
-      if (data.theme) setTheme(data.theme);
+      if (Array.isArray(data.forms)) {
+        setForms(data.forms);
+      }
+      if (data.profile) {
+        setProfile(data.profile);
+      }
+      if (data.theme) {
+        setTheme(data.theme);
+      }
     });
 
     const handleResize = () => setIsWideWindow(window.innerWidth > 500);
@@ -90,7 +96,9 @@ function App() {
   };
 
   const saveProfile = () => {
-    if (!inputName.trim()) return;
+    if (!inputName.trim()) {
+      return;
+    }
     const newProfile = { name: inputName };
     chrome.storage.local.set({ profile: newProfile }, () => {
       setProfile(newProfile);
@@ -111,10 +119,16 @@ function App() {
   };
 
   const handleFormSubmit = () => {
-    if (!newFormName || !newFormUrl) { showMessage('名称とURLは必須です'); return; }
+    if (!newFormName || !newFormUrl) { 
+      showMessage('名称とURLは必須です'); 
+      return; 
+    }
+
     let extractedId = newFormUrl;
     const match = newFormUrl.match(/\/d\/e\/([^/]+)\//);
-    if (match && match[1]) extractedId = match[1];
+    if (match && match[1]) {
+      extractedId = match[1];
+    }
 
     const formData: SavedForm = {
       id: editingId || crypto.randomUUID(),
@@ -154,33 +168,50 @@ function App() {
     if (confirm('削除しますか？')) {
       const updated = forms.filter(f => f.id !== id);
       saveForms(updated);
-      if (editingId === id) cancelEditing();
+      if (editingId === id) {
+        cancelEditing();
+      }
     }
   };
 
   const handleDragStart = (index: number) => { dragItemIndex.current = index; };
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (dragItemIndex.current === null || dragItemIndex.current === index) return;
+    if (dragItemIndex.current === null || dragItemIndex.current === index) {
+      return;
+    }
+    
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const position = e.clientY < (rect.top + rect.height / 2) ? 'top' : 'bottom';
     setDropTarget({ index, position });
   };
   const handleDrop = () => {
-    if (dragItemIndex.current === null || !dropTarget) return;
+    if (dragItemIndex.current === null || !dropTarget) {
+      return;
+    }
+
     const _forms = [...forms];
     const draggedItem = _forms[dragItemIndex.current];
     _forms.splice(dragItemIndex.current, 1);
     let insertIndex = dropTarget.index;
-    if (dragItemIndex.current < dropTarget.index) insertIndex--;
-    if (dropTarget.position === 'bottom') insertIndex++;
+
+    if (dragItemIndex.current < dropTarget.index) {
+      insertIndex--;
+    }
+    if (dropTarget.position === 'bottom') {
+      insertIndex++;
+    }
+
     _forms.splice(insertIndex, 0, draggedItem);
     saveForms(_forms);
     dragItemIndex.current = null; setDropTarget(null);
   };
 
   const openAndRun = (form: SavedForm) => {
-    if (!profile) { showMessage('名前を設定してください'); return; }
+    if (!profile) { 
+      showMessage('名前を設定してください'); 
+      return; 
+    }
     chrome.tabs.create({ url: `https://docs.google.com/forms/d/e/${form.urlId}/viewform`, active: true });
   };
   const openGitHub = () => chrome.tabs.create({ url: 'https://github.com/tukuyomil032/Google-Forms-Auto-Submit-Extension' });

@@ -1,8 +1,13 @@
 import { type SavedForm, type StorageData } from './interface';
 
+let autoSubmitted = false;
+
 window.addEventListener('load', () => {
   if (window.location.href.includes('formResponse')) {
-    requestCloseTab();
+    if (autoSubmitted) {
+      requestCloseTab();
+      return;
+    }
     return;
   }
 
@@ -12,7 +17,9 @@ window.addEventListener('load', () => {
 async function main() {
   const url = window.location.href;
 
-  if (!url.includes('viewform')) return;
+  if (!url.includes('viewform')) {
+    return;
+  }
 
   chrome.storage.local.get(['forms', 'profile'], (result) => {
     const data = result as Partial<StorageData>;
@@ -20,14 +27,14 @@ async function main() {
     const profile = data.profile;
 
     if (!profile || !profile.name) {
-      console.log('Autofill: プロフィール(名前)が設定されていないためスキップします');
+      console.log('Autofill: Profile (name) is not set; skipping');
       return;
     }
 
     const targetForm = forms.find((f) => url.includes(f.urlId));
 
     if (targetForm) {
-      console.log(`Autofill: 設定「${targetForm.displayName}」が見つかりました。実行します。`);
+      console.log(`Autofill: Configuration "${targetForm.displayName}" found. Executing.`);
       executeAutoFill(targetForm, profile.name);
     }
   });
@@ -57,7 +64,8 @@ function handleEmailCheckbox() {
 
     if (textContent.includes('メールアドレス') && textContent.includes('記録')) {
       if (el.getAttribute('aria-checked') !== 'true') {
-        console.log('Autofill: メールアドレス記録チェックボックスをONにします');
+        console.log('Autofill: Enabling save email address checkbox');
+
         el.click();
       }
     }
@@ -72,10 +80,10 @@ function executeAutoFill(formConfig: SavedForm, userName: string) {
   setTimeout(() => {
     const textInputs = document.querySelectorAll('input[type="text"], textarea');
     if (textInputs[formConfig.targetIndex]) {
-      console.log(`Autofill: ${formConfig.targetIndex}番目の入力欄に名前を入力します`);
+      console.log(`Autofill: Inputting name into field index ${formConfig.targetIndex}`);
       setNativeValue(textInputs[formConfig.targetIndex] as HTMLInputElement, userName);
     } else {
-      console.warn('Autofill: 指定されたインデックスの入力欄が見つかりませんでした');
+      console.warn('Autofill: Specified input index not found');
     }
   }, 500);
 
@@ -91,7 +99,7 @@ function clickSubmitButtonRecursive(attempt = 1) {
   }
 
   if (attempt > 10) {
-    console.log('Autofill: タイムアウト - 送信ボタンが見つかりませんでした');
+    console.log('Autofill: Timeout - submit button not found');
     return;
   }
 
@@ -105,8 +113,7 @@ function clickSubmitButtonRecursive(attempt = 1) {
   if (submitBtn) {
     const clickable = submitBtn.closest('div[role="button"], button') as HTMLElement || submitBtn as HTMLElement;
 
-    console.log('Autofill: 送信ボタンを発見。クリック処理を実行します。');
-
+    console.log('Autofill: Submit button found. Performing click.');
     clickable.style.border = '4px solid red';
 
     const rect = clickable.getBoundingClientRect();
@@ -121,6 +128,7 @@ function clickSubmitButtonRecursive(attempt = 1) {
       clientY: y
     };
 
+    autoSubmitted = true;
     clickable.dispatchEvent(new MouseEvent('mousedown', eventOptions));
     clickable.dispatchEvent(new MouseEvent('mouseup', eventOptions));
     clickable.dispatchEvent(new MouseEvent('click', eventOptions));
@@ -128,33 +136,51 @@ function clickSubmitButtonRecursive(attempt = 1) {
     monitorSubmission();
 
   } else {
-    console.log(`Autofill: 送信ボタン探索中...(${attempt}/10)`);
+    console.log(`Autofill: Searching for submit button...(${attempt}/10)`);
     setTimeout(() => clickSubmitButtonRecursive(attempt + 1), 1000);
   }
 }
 
 function monitorSubmission() {
-  console.log('Autofill: 送信完了を監視します...');
+  console.log('Autofill: Monitoring for submission completion...');
 
   let checks = 0;
   const interval = setInterval(() => {
     checks++;
     if (window.location.href.includes('formResponse')) {
       clearInterval(interval);
-      console.log('Autofill: 送信完了を確認しました。タブを閉じます。');
+      console.log('Autofill: Submission confirmed. Closing tab.');
       requestCloseTab();
     } else if (checks > 20) {
       clearInterval(interval);
-      console.log('Autofill: 送信完了を確認できませんでした（タイムアウト）');
+      console.log('Autofill: Could not confirm submission (timeout)');
     }
   }, 1000);
 }
 
 function requestCloseTab() {
+  if (!autoSubmitted) {
+    return;
+  }
+
   try {
-    chrome.runtime.sendMessage({ action: 'closeTab' });
+    chrome.runtime.sendMessage({ action: 'closeTab' }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn('Autofill: Error sending message; attempting fallback', chrome.runtime.lastError);
+        try {
+          window.postMessage({ type: 'AUTOFILL_CLOSE_TAB_ATTEMPT' }, '*');
+        } catch (err) {
+          console.error('Autofill: Fallback postMessage failed', err);
+        }
+      }
+    });
   } catch (e) {
-    console.error('Autofill: タブを閉じるメッセージの送信に失敗しました', e);
+      console.error('Autofill: Exception while sending close tab message', e);
+    try {
+      window.postMessage({ type: 'AUTOFILL_CLOSE_TAB_ATTEMPT' }, '*');
+    } catch (err) {
+      console.error('Autofill: Fallback postMessage failed (exception)', err);
+    }
   }
 }
 

@@ -28,9 +28,15 @@ export const ThemeToggle: React.FC<Props> = ({ theme, onThemeChange }) => {
 
   const triggerAnimation = (nextTheme: AppTheme) => {
     let color = '#fff';
-    if (nextTheme === 'light') color = '#cbd5e1';
-    if (nextTheme === 'dark') color = '#4b5563';
-    if (nextTheme === 'darkBlue') color = '#3b82f6';
+    if (nextTheme === 'light') {
+      color = '#cbd5e1';
+    }
+    if (nextTheme === 'dark') {
+      color = '#4b5563';
+    }
+    if (nextTheme === 'darkBlue') {
+      color = '#3b82f6';
+    }
 
     const newParticles: Particle[] = [];
     for (let i = 0; i < 8; i++) {
